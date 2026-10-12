@@ -1,22 +1,33 @@
-# Definição do dataset — Auditoria de Calçadas (CPZÃO)
+# Definição do dataset — Auditoria de Acessibilidade em Calçadas (CPZÃO)
 #
-# Este arquivo é a referência versionada das classes. O arquivo que o treino
-# realmente consome é gerado pelo notebook 01 (com caminhos absolutos), dentro
-# da pasta baixada do Roboflow.
+# Este arquivo é a referência versionada das classes. O data.yaml que o treino
+# realmente consome é gerado pelo notebook 01, dentro de dataset/calcadas/,
+# com caminhos absolutos.
 #
 # ⚠️ A ORDEM das classes é um contrato entre três lugares — se mudar aqui,
 #    tem que mudar nos três:
 #      1. este data.yaml
-#      2. CLASSES, nos notebooks 01 e 02
+#      2. CLASSES, em scripts/zenodo_dataset.py (usado pelos notebooks)
 #      3. CLASS_NAMES, em app/src/main.js
 
-path: .          # preenchido em runtime pelo notebook 01
+path: ./calcadas
 train: train/images
 val: valid/images
 test: test/images
 
 nc: 3
 names:
-  - buraco       # 0 · 🔴 buraco, cratera, trinca profunda, piso quebrado/faltante
-  - piso_tatil   # 1 · 🟡 piso tátil direcional ou de alerta
-  - obstaculo    # 2 · 🟢 poste, lixeira, hidrante, bicicletário bloqueando a faixa livre
+  - degrau     # 0 · 🔴 desnível isolado: guia de calçada, soleira, mudança de nível
+  - escada     # 1 · 🟡 dois ou mais degraus em sequência
+  - corrimao   # 2 · 🟢 apoio/guarda-corpo de escada ou rampa
+
+# ─── Origem ───
+# Derivado de "Image Dataset of Accessibility Barriers"
+#   Stolberg, Jakob (2022)
+#   Alexander von Humboldt Institute for Internet and Society
+#   https://zenodo.org/records/6382090
+#   Licença: CC-BY-4.0
+#
+# O dataset original tem 4 labels (step, stair, grab_bar, ramp) em 5.538 imagens.
+# 'ramp' foi descartada: 143 instâncias contra 3.564 de 'step' (1:25) — com esse
+# desbalanceamento a classe não aprende e ainda suja a matriz de confusão.

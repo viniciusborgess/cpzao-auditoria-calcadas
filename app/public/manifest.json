@@ -1,7 +1,7 @@
 {
   "name": "Auditoria de Calçadas · CPZÃO",
   "short_name": "Calçadas",
-  "description": "Auditoria de acessibilidade urbana: detecção de buracos, piso tátil e obstáculos em calçadas com YOLOv8n",
+  "description": "Auditoria de acessibilidade urbana: detecção de degraus, escadas e corrimãos em espaços públicos com YOLOv8n",
   "start_url": "/",
   "display": "fullscreen",
   "orientation": "any",

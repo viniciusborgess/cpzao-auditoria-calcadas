@@ -123,12 +123,12 @@ btnModel.querySelector('span').textContent = '🤖 Modelo';
 const COLORS = ['#ff1744', '#ffd600', '#00e676', '#00b0ff', '#d500f9'];
 // Classes da auditoria de calçadas — a ORDEM deve ser idêntica à do data.yaml
 // (e à lista CLASSES dos notebooks). Trocar a ordem aqui troca os rótulos na tela.
-const CLASS_NAMES = ['buraco', 'piso_tatil', 'obstaculo'];
+const CLASS_NAMES = ['degrau', 'escada', 'corrimao'];
 // Rótulos exibidos (acentuados) e cor de cada classe:
-//   0 buraco     → vermelho  #ff1744
-//   1 piso_tatil → amarelo   #ffd600
-//   2 obstaculo  → verde     #00e676
-const CLASS_LABELS = { buraco: 'Buraco', piso_tatil: 'Piso Tátil', obstaculo: 'Obstáculo' };
+//   0 degrau   → vermelho  #ff1744  (desnível isolado: guia, soleira)
+//   1 escada   → amarelo   #ffd600  (dois ou mais degraus em sequência)
+//   2 corrimao → verde     #00e676  (apoio de escada ou rampa)
+const CLASS_LABELS = { degrau: 'Degrau', escada: 'Escada', corrimao: 'Corrimão' };
 const POSE_NAMES  = ['person'];
 const COCO_NAMES  = ['person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','traffic light','fire hydrant','stop sign','parking meter','bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','umbrella','handbag','tie','suitcase','frisbee','skis','snowboard','sports ball','kite','baseball bat','baseball glove','skateboard','surfboard','tennis racket','bottle','wine glass','cup','fork','knife','spoon','bowl','banana','apple','sandwich','orange','broccoli','carrot','hot dog','pizza','donut','cake','chair','couch','potted plant','bed','dining table','toilet','tv','laptop','mouse','remote','keyboard','cell phone','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddy bear','hair drier','toothbrush'];
 const MODEL_CALCADAS = '/models/calcadas.onnx';   // modelo do projeto (exportado em 192)

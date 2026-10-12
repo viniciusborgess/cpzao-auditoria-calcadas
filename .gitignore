@@ -1,4 +1,8 @@
 # ─── Dataset (imagens não vão para o Git — ver dataset/README.md) ───
+# O dataset é reconstruído pelo notebook 01 a partir do Zenodo, então não há
+# motivo para versionar centenas de JPEGs.
+dataset/calcadas/
+dataset/.cache_jpg/
 dataset/raw/**
 dataset/images/
 dataset/labels/

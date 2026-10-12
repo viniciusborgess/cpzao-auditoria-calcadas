@@ -1,0 +1,51 @@
+{
+  "total_imagens": 600,
+  "total_caixas": 1326,
+  "por_classe": {
+    "degrau": 436,
+    "escada": 453,
+    "corrimao": 437
+  },
+  "por_split": {
+    "train": {
+      "imagens": 420,
+      "com_caixa": 398,
+      "negativas": 22,
+      "caixas": 949,
+      "por_classe": {
+        "degrau": 308,
+        "escada": 324,
+        "corrimao": 317
+      }
+    },
+    "valid": {
+      "imagens": 120,
+      "com_caixa": 111,
+      "negativas": 9,
+      "caixas": 247,
+      "por_classe": {
+        "degrau": 78,
+        "escada": 86,
+        "corrimao": 83
+      }
+    },
+    "test": {
+      "imagens": 60,
+      "com_caixa": 55,
+      "negativas": 5,
+      "caixas": 130,
+      "por_classe": {
+        "degrau": 50,
+        "escada": 43,
+        "corrimao": 37
+      }
+    }
+  },
+  "classes": [
+    "degrau",
+    "escada",
+    "corrimao"
+  ],
+  "disco_mb": 45,
+  "problemas_labels": 0
+}

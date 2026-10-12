@@ -1,163 +1,142 @@
-# Protocolo de Captura e Anotação
+# 📸 Opcional — Ampliar o Dataset com Fotos Próprias
 
-> ⏱️ **Tempo estimado:** ~40 min de captura + ~50 min de anotação.
-> Faça nesta ordem. O resto do pipeline (treino, export, app) já está pronto e automatizado.
+> **Este passo não é necessário.** O dataset do projeto é montado automaticamente pelo
+> [`notebooks/01_dataset_prep.ipynb`](notebooks/01_dataset_prep.ipynb) a partir de uma base
+> pública aberta ([Zenodo 6382090](https://zenodo.org/records/6382090), CC-BY-4.0), com
+> centenas de imagens já anotadas. A rubrica exige no mínimo 60 — o notebook entrega muito
+> mais que isso sem você tirar uma única foto.
+>
+> Siga este guia só se quiser **melhorar a demonstração ao vivo**.
 
 ---
 
-## 1. Captura das fotos
+## Por que isso melhoraria a demo
 
-### Meta de volume
+O dataset público é de espaços públicos europeus. `degrau`, `escada` e `corrimao` são
+visualmente universais — um corrimão metálico é um corrimão metálico em qualquer lugar —
+então o modelo transfere bem. É por isso que essas três classes foram escolhidas.
 
-A rubrica exige **mínimo 60 imagens**. Capture **80–100** — sobra margem para descartar
-fotos tremidas/escuras e ainda ficar acima do mínimo.
+Ainda assim, um modelo vê melhor o que já viu. Acrescentar **20–30 fotos do corredor, da
+escada e da rampa da própria faculdade** ancora o modelo no domínio exato da apresentação.
+Custa ~30 min e reduz o risco na parte que vale **6 dos 20 pontos**.
 
-| classe | fotos-alvo | instâncias mínimas |
-|:--|:--:|:--:|
-| `buraco` — buraco, cratera, trinca profunda, piso quebrado/faltante | ~30 | 30 |
-| `piso_tatil` — piso tátil direcional ou de alerta | ~30 | 30 |
-| `obstaculo` — poste, lixeira, hidrante, bicicletário, mesa na calçada | ~30 | 30 |
+Se o tempo estiver curto, **pule**. O modelo treinado só com a base pública funciona.
 
-Uma mesma foto pode conter **mais de uma classe** — isso é ótimo, aproveite
-(ex.: poste plantado no meio do piso tátil é a foto perfeita, conta para duas classes).
+---
 
-### ⚠️ A regra que mais vale nota
+## 1. Captura (~15 min)
 
-**Fotografe no mesmo lugar e na mesma altura em que você vai demonstrar o app em aula.**
+### Onde
 
-O modelo aprende o domínio que você mostrar para ele. Se as 80 fotos forem tiradas de pé,
-celular na altura do peito, apontado ~45° para baixo na calçada — é **exatamente assim** que
-ele vai funcionar na demo. Se você treinar com fotos de cima e demonstrar de longe, não detecta
-nada na frente da turma, e a demo vale **6 dos 20 pontos**.
+**No local exato da apresentação.** Escada do prédio, corrimão da rampa, guia da calçada
+na entrada. Se você vai demonstrar no corredor do segundo andar, fotografe o corredor do
+segundo andar.
 
-→ Escolha agora a rua da demonstração. Capture lá (e em 2–3 ruas parecidas).
+### Quanto
 
-### Protocolo
+| classe | fotos | o que procurar |
+|:--|:--:|:--|
+| `degrau` | ~10 | guia de calçada, soleira de porta, desnível isolado de um único degrau |
+| `escada` | ~10 | qualquer escada — dois ou mais degraus em sequência contam |
+| `corrimao` | ~10 | corrimão de escada, guarda-corpo de rampa, barra de apoio |
 
-- **Câmera traseira**, foto normal, **sem zoom** (zoom digital degrada a imagem).
-- Altura do peito/cintura, inclinada **30–50° para baixo**, enquadrando a calçada.
-- Distância do alvo: **1 a 3 metros**. Varie dentro dessa faixa.
-- O alvo deve ocupar entre ~10% e ~60% do quadro. Nem minúsculo, nem colado.
+Uma escada com corrimão é **uma foto que conta para duas classes**. Procure esses
+enquadramentos — rendem o dobro.
 
-### Variedade (é isso que faz o mAP subir)
+### Como
 
-Não tire 30 fotos do mesmo buraco. Varie deliberadamente:
+- **Câmera traseira**, sem zoom.
+- Altura do peito, inclinada **30–50° para baixo**.
+- Distância: **1 a 3 m**. Varie dentro da faixa.
+- O alvo deve ocupar de ~10% a ~60% do quadro.
+- Varie luz (sol, sombra, interior), ângulo (frontal, lateral, diagonal) e piso.
+- Evite: tremido, contraluz forte, alvo cortado na borda.
 
-- ✅ **Ruas diferentes:** mínimo 3 quadras distintas.
-- ✅ **Luz:** sol direto, sombra, nublado. Se der, algumas no fim da tarde.
-- ✅ **Ângulo:** frontal, lateral, diagonal do mesmo tipo de alvo.
-- ✅ **Piso:** concreto, ladrilho, asfalto, bloquete — fundos diferentes.
-- ✅ **Contexto:** alguns quadros com pessoas/carros ao fundo (é o que a câmera vai ver).
-- ❌ Evite: fotos tremidas, contraluz extremo, alvo cortado na borda, chão molhado refletindo.
+---
 
-### Transferir para o computador
+## 2. Importar (1 comando)
 
-Mande as fotos para o Mac (AirDrop, cabo, Google Fotos — tanto faz, desde que caiam em
-`~/Downloads`). Depois rode **um comando**:
+Mande as fotos para o Mac (AirDrop, cabo, tanto faz) e rode:
 
 ```bash
 cd ~/Documents/cpzao-auditoria-calcadas
 ./scripts/preparar_fotos.sh
 ```
 
-O script faz tudo:
+O script move as imagens de `~/Downloads` para `dataset/raw/`, **converte HEIC → JPG**
+(o iPhone salva em HEIC e o Roboflow não lê), renumera em sequência e conta o resultado.
 
-1. move as imagens de `~/Downloads` para `dataset/raw/`
-2. **converte HEIC → JPG** (o iPhone salva em HEIC e o Roboflow não lê esse formato)
-3. renomeia em sequência: `calcada_0001.jpg`, `calcada_0002.jpg`, …
-4. conta e avisa se ainda faltam fotos para o mínimo da rubrica
-
-Se as fotos estiverem em outra pasta, passe o caminho:
+Outra pasta de origem:
 
 ```bash
-./scripts/preparar_fotos.sh ~/Desktop/fotos-calcada
+./scripts/preparar_fotos.sh ~/Desktop/fotos
 ```
-
-> O script é idempotente: pode rodar de novo depois de capturar mais fotos, que ele só
-> acrescenta e renumera.
 
 ---
 
-## 2. Anotação no Roboflow
+## 3. Anotar no Roboflow (~15 min)
 
-Conta gratuita em [roboflow.com](https://roboflow.com) — o plano free cobre este projeto.
+Conta gratuita em [roboflow.com](https://roboflow.com).
 
-### 2.1 Criar o projeto
+1. **Create New Project** → Object Detection → nome `auditoria-calcadas`
+2. Upload da pasta `dataset/raw/`
+3. Crie as 3 classes com os nomes **exatos** — minúsculo, sem acento, com underscore:
+   `degrau` · `escada` · `corrimao`
 
-1. **Create New Project**
-2. Project Type: **Object Detection**
-3. Project Name: `auditoria-calcadas`
-4. Annotation Group: `defeito-calcada`
+### Regras de anotação
 
-### 2.2 Upload
+Use as mesmas regras da base pública, para que suas fotos e as dela sejam consistentes
+entre si. São as regras originais do
+[protocolo do dataset](https://zenodo.org/records/6382090):
 
-Arraste a pasta `dataset/raw/` inteira → **Save and Continue**.
-
-### 2.3 Anotar — as regras de consistência
-
-Na rubrica, *"3 classes anotadas com **consistência**"* vale 4 pontos. Consistência significa
-**decidir uma regra e não mudar no meio do caminho**. Use estas:
-
-**Crie as 3 classes exatamente com estes nomes** (minúsculo, com underscore — o app depende disso):
-`buraco` · `piso_tatil` · `obstaculo`
-
-| regra | o que fazer |
+| classe | regra |
 |:--|:--|
-| **Caixa justa** | Encoste a caixa na borda do objeto. Sem folga, sem cortar. |
-| **Anote TODAS as instâncias** | 4 buracos na foto = 4 caixas. Objeto não anotado ensina o modelo que aquilo é fundo — é o erro que mais destrói o recall. |
-| **`piso_tatil`: uma caixa por trecho contínuo** | A faixa inteira visível = 1 caixa. Não faça uma caixa por placa/ladrilho. Se a faixa for interrompida (por um poste, uma entrada de garagem), aí sim são 2 caixas. |
-| **`buraco`: só o que é defeito real** | Buraco, cratera, trinca larga/profunda, pedaço de piso faltando. **Não** anote junta de dilatação, risco superficial ou mancha. |
-| **`obstaculo`: só o que bloqueia a faixa livre** | Poste, lixeira, hidrante, bicicletário, mesa, placa **na calçada**. Poste atrás do muro ou na rua **não** conta. |
-| **Oclusão** | Objeto 50%+ visível → anote a parte visível. Menos que isso → pule. |
-| **Dúvida** | Se você hesitou 5 segundos, pule a instância. Anotação ambígua é pior que ausente. |
+| `degrau` | A caixa envolve **exatamente a parte vertical** do desnível — não se estende para a superfície horizontal de cima nem de baixo. Só conte desníveis que funcionam como passagem entre duas superfícies de circulação. |
+| `escada` | Dois ou mais degraus em sequência = **uma caixa** envolvendo o conjunto todo. Não faça uma caixa por degrau. |
+| `corrimao` | Uma caixa por corrimão. Escada com corrimão nos dois lados = 2 caixas. |
+| **todas** | Caixa justa, sem folga. Anote **todas** as instâncias visíveis. Objeto visível só pela metade: anote a parte visível. Menos que isso: pule. |
 
-> 💡 Divida o trabalho no grupo, mas **anotem as 10 primeiras fotos juntos** para alinhar o
-> critério. Cada integrante com uma régua diferente = matriz de confusão suja.
+> ⚠️ Fotografado **de cima**, onde o degrau não é visível como desnível, o objeto **não é
+> anotado** — mesmo que um humano saiba que há um degrau ali. Essa é a regra da base
+> original; mantê-la é o que torna o conjunto consistente.
 
-### 2.4 Gerar a versão
+### Gerar a versão
 
-**Generate** → configure assim:
+**Generate** → Train/Test Split `70/20/10` → Preprocessing: **Auto-Orient** + Resize
+*Fit within* `640×640` → Augmentation: flip horizontal, brilho ±20%, blur ≤1.5px → **Create**
 
-**Train/Test Split:** `70% train / 20% valid / 10% test`
-*(a rubrica exige explicitamente os três splits — não deixe o test em 0%)*
+**Download Dataset** → formato **YOLOv8** → *show download code*.
 
-**Preprocessing:**
-- ✅ Auto-Orient *(corrige a rotação EXIF do celular — sem isso suas caixas saem tortas)*
-- ✅ Resize → **Fit within** → `640 × 640` *(preserva a proporção; o treino reduz para 192 depois)*
+---
 
-**Augmentation** *(só no train — o Roboflow já cuida disso):*
-- ✅ Flip: **Horizontal**
-- ✅ Brightness: **±20%**
-- ✅ Blur: até **1.5px**
-- ✅ Rotation: **±10°**
-- **Max version size: 3×** → 60 fotos de treino viram ~170. Com dataset pequeno, isso sozinho
-  costuma render +5 a +15 pontos de mAP50.
+## 4. Juntar com a base pública
 
-→ **Create**
-
-### 2.5 Exportar
-
-Na versão criada: **Download Dataset** → Format: **YOLOv8** → **show download code**
-
-Copie o snippet, que tem esta cara:
+No [`notebooks/01_dataset_prep.ipynb`](notebooks/01_dataset_prep.ipynb), depois da célula 7
+(que escreve o dataset), acrescente uma célula:
 
 ```python
-rf.workspace("seu-workspace").project("auditoria-calcadas").version(1).download("yolov8")
+# Baixa suas fotos anotadas e junta ao dataset público
+!pip install -q roboflow
+from roboflow import Roboflow
+rf = Roboflow(api_key="SUA_API_KEY")
+meu = rf.workspace("SEU_WORKSPACE").project("auditoria-calcadas").version(1).download("yolov8")
+
+import shutil
+from pathlib import Path
+origem = Path(meu.location)
+for split_rf, split_nosso in [("train", "train"), ("valid", "valid"), ("test", "test")]:
+    for sub in ("images", "labels"):
+        src = origem / split_rf / sub
+        if not src.is_dir():
+            continue
+        for f in src.iterdir():
+            shutil.copy(f, DEST / split_nosso / sub / f"minha_{f.name}")
+
+print("✅ fotos próprias integradas")
 ```
 
-➡️ **Cole isso no notebook [`notebooks/01_dataset_prep.ipynb`](notebooks/01_dataset_prep.ipynb), célula 3.**
-Pegue também sua **API key** em Roboflow → Settings → API Keys.
+> ⚠️ Confirme que a **ordem das classes** no seu projeto do Roboflow é a mesma:
+> `degrau`, `escada`, `corrimao`. Os `class_id` das labels seguem essa ordem — se estiver
+> trocada, o modelo aprende os rótulos errados. A célula 4 do notebook 01 faz essa checagem.
 
----
-
-## 3. Checklist antes de treinar
-
-- [ ] 60+ imagens anotadas (de preferência 80+)
-- [ ] 3 classes com os nomes exatos: `buraco`, `piso_tatil`, `obstaculo`
-- [ ] 30+ instâncias de cada classe
-- [ ] Split 70/20/10 com os três conjuntos preenchidos
-- [ ] Auto-Orient ligado
-- [ ] Fotos tiradas no local da demonstração
-- [ ] Snippet de download + API key em mãos
-
-Tudo marcado → abra o `01_dataset_prep.ipynb` no Colab.
+Depois rode as células de validação e estatísticas novamente, e siga para o notebook 02.
