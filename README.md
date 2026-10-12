@@ -12,14 +12,12 @@ processamento 100% local.
 
 ## 👥 Integrantes do Grupo
 
-> ⚠️ **PREENCHER ANTES DE ENTREGAR**
-
 | Nome completo | RM |
 |:--|:--|
-| *(nome)* | *(RM)* |
-| *(nome)* | *(RM)* |
-| *(nome)* | *(RM)* |
-| *(nome)* | *(RM)* |
+| Vinicius Sobreira Borges | RM97767 |
+| Leticia Baptista | RM550289 |
+| Julia Ortiz | RM550204 |
+| Julia Palomari | RM551910 |
 
 ---
 
