@@ -52,19 +52,29 @@ Não tire 30 fotos do mesmo buraco. Varie deliberadamente:
 
 ### Transferir para o computador
 
-Jogue tudo em `dataset/raw/`:
+Mande as fotos para o Mac (AirDrop, cabo, Google Fotos — tanto faz, desde que caiam em
+`~/Downloads`). Depois rode **um comando**:
 
 ```bash
-# AirDrop para ~/Downloads, depois:
-mv ~/Downloads/IMG_*.{jpg,JPG,jpeg,HEIC,heic} dataset/raw/ 2>/dev/null
-
-# iPhone salva em HEIC — o Roboflow não lê. Converta:
-cd dataset/raw && for f in *.HEIC *.heic; do
-  [ -e "$f" ] && sips -s format jpeg "$f" --out "${f%.*}.jpg" && rm "$f"
-done
-
-ls dataset/raw | wc -l    # confira: deve dar 80+
+cd ~/Documents/cpzao-auditoria-calcadas
+./scripts/preparar_fotos.sh
 ```
+
+O script faz tudo:
+
+1. move as imagens de `~/Downloads` para `dataset/raw/`
+2. **converte HEIC → JPG** (o iPhone salva em HEIC e o Roboflow não lê esse formato)
+3. renomeia em sequência: `calcada_0001.jpg`, `calcada_0002.jpg`, …
+4. conta e avisa se ainda faltam fotos para o mínimo da rubrica
+
+Se as fotos estiverem em outra pasta, passe o caminho:
+
+```bash
+./scripts/preparar_fotos.sh ~/Desktop/fotos-calcada
+```
+
+> O script é idempotente: pode rodar de novo depois de capturar mais fotos, que ele só
+> acrescenta e renumera.
 
 ---
 
