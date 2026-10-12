@@ -1,0 +1,22 @@
+# Definição do dataset — Auditoria de Calçadas (CPZÃO)
+#
+# Este arquivo é a referência versionada das classes. O arquivo que o treino
+# realmente consome é gerado pelo notebook 01 (com caminhos absolutos), dentro
+# da pasta baixada do Roboflow.
+#
+# ⚠️ A ORDEM das classes é um contrato entre três lugares — se mudar aqui,
+#    tem que mudar nos três:
+#      1. este data.yaml
+#      2. CLASSES, nos notebooks 01 e 02
+#      3. CLASS_NAMES, em app/src/main.js
+
+path: .          # preenchido em runtime pelo notebook 01
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 3
+names:
+  - buraco       # 0 · 🔴 buraco, cratera, trinca profunda, piso quebrado/faltante
+  - piso_tatil   # 1 · 🟡 piso tátil direcional ou de alerta
+  - obstaculo    # 2 · 🟢 poste, lixeira, hidrante, bicicletário bloqueando a faixa livre
