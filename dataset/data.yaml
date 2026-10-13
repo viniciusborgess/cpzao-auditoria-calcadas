@@ -1,4 +1,4 @@
-# Definição do dataset — Auditoria de Acessibilidade em Calçadas (CPZÃO)
+# Definição do dataset — Auditoria de Acessibilidade em Calçadas (Checkpoint)
 #
 # Este arquivo é a referência versionada das classes. O data.yaml que o treino
 # realmente consome é gerado pelo notebook 01, dentro de dataset/calcadas/,

@@ -1,6 +1,6 @@
 # ♿ Auditoria de Acessibilidade em Calçadas com Visão Computacional
 
-**CPZÃO — Checkpoint Integrado** · Pipeline completo de Visão Computacional, da aquisição de
+**Checkpoint Integrado** · Pipeline completo de Visão Computacional, da aquisição de
 dados à inferência em tempo real na borda (*edge computing*).
 
 Detecção de **barreiras de acessibilidade** em espaços públicos — degraus, escadas e

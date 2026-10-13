@@ -1,5 +1,5 @@
 {
-  "name": "Auditoria de Calçadas · CPZÃO",
+  "name": "Auditoria de Calçadas · Checkpoint",
   "short_name": "Calçadas",
   "description": "Auditoria de acessibilidade urbana: detecção de degraus, escadas e corrimãos em espaços públicos com YOLOv8n",
   "start_url": "./",
