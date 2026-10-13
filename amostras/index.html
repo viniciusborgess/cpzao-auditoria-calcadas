@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imagens de teste · Auditoria de Calçadas</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 20px 16px 48px;
+      background: #0a0a0a; color: #e8e8ea;
+      font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 21px; margin: 0 0 6px; }
+    .sub { color: #9a9aa2; margin: 0 0 22px; font-size: 14px; }
+    .aviso {
+      background: #16161a; border: 1px solid #2a2a31; border-left: 3px solid #ffd600;
+      border-radius: 8px; padding: 12px 14px; margin: 0 0 24px; font-size: 14px;
+    }
+    .aviso b { color: #ffd600; }
+    ol.passos { margin: 0 0 26px; padding-left: 20px; color: #c8c8d0; font-size: 14px; }
+    ol.passos li { margin-bottom: 6px; }
+    .grade { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .card {
+      background: #131317; border: 1px solid #26262d; border-radius: 12px;
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: #000; }
+    .meta { padding: 10px 12px 12px; }
+    .esperado { font-size: 13px; color: #c8c8d0; margin: 0 0 9px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; color: #0a0a0a; }
+    .t-degrau   { background: #ff1744; color: #fff; }
+    .t-escada   { background: #ffd600; }
+    .t-corrimao { background: #00e676; }
+    a.baixar {
+      display: block; text-align: center; text-decoration: none;
+      background: #2563eb; color: #fff; font-weight: 600; font-size: 14px;
+      padding: 9px; border-radius: 8px;
+    }
+    a.baixar:active { background: #1d4ed8; }
+    .voltar {
+      display: inline-block; margin-top: 30px; color: #7aa2ff;
+      text-decoration: none; font-size: 14px;
+    }
+    footer { margin-top: 34px; color: #6a6a74; font-size: 12px; border-top: 1px solid #26262d; padding-top: 16px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🖼️ Imagens de teste</h1>
+  <p class="sub">
+    Para testar o app sem precisar encontrar uma escada de verdade.
+    Todas são do conjunto de <strong>teste</strong> — o modelo nunca as viu durante o treino.
+  </p>
+
+  <div class="aviso">
+    <b>Importante:</b> o que está escrito em cada imagem é o <b>gabarito</b> (o que existe na
+    foto), não o que o modelo necessariamente vai achar. O modelo acerta bem
+    <span class="tag t-escada">escada</span> e
+    <span class="tag t-corrimao">corrimao</span>; em
+    <span class="tag t-degrau">degrau</span> ele perde bastante — isso está documentado e
+    explicado no README.
+  </div>
+
+  <ol class="passos">
+    <li>Toque em <strong>Baixar</strong> e salve a imagem no celular</li>
+    <li>Abra o <a href="../" style="color:#7aa2ff">app</a></li>
+    <li>Toque em <strong>📤 Imagem</strong> e escolha a foto salva</li>
+    <li>Se não detectar nada, arraste <strong>Confiança</strong> para ~<strong>0.20</strong></li>
+  </ol>
+
+  <div class="grade" id="grade"></div>
+
+  <a class="voltar" href="../">← voltar para o app</a>
+
+  <footer>
+    Imagens derivadas de <em>Image Dataset of Accessibility Barriers</em> —
+    Stolberg, Jakob (2022), licença CC-BY-4.0 ·
+    <a href="https://zenodo.org/records/6382090" style="color:#6a6a74">zenodo.org/records/6382090</a>
+  </footer>
+</div>
+
+<script>
+const AMOSTRAS = [
+  ["01-tres-classes-degrau-escada-corrimao", "3 degraus, 1 escada, 1 corrimão", ["degrau","escada","corrimao"]],
+  ["02-tres-classes-degrau-escada-corrimao", "2 degraus, 1 escada, 1 corrimão", ["degrau","escada","corrimao"]],
+  ["03-tres-classes-degrau-escada-corrimao", "1 degrau, 1 escada, 2 corrimãos", ["degrau","escada","corrimao"]],
+  ["04-tres-classes-degrau-escada-corrimao", "1 degrau, 1 escada, 1 corrimão", ["degrau","escada","corrimao"]],
+  ["05-escada-e-corrimao", "2 escadas, 3 corrimãos", ["escada","corrimao"]],
+  ["06-escada-e-corrimao", "3 escadas, 4 corrimãos", ["escada","corrimao"]],
+  ["07-escada-e-corrimao", "1 escada, 2 corrimãos", ["escada","corrimao"]],
+  ["08-escada-e-corrimao", "1 escada, 1 corrimão", ["escada","corrimao"]],
+  ["09-apenas-degraus", "3 degraus (guia de calçada)", ["degrau"]],
+  ["10-apenas-degrau", "1 degrau", ["degrau"]],
+];
+
+document.getElementById('grade').innerHTML = AMOSTRAS.map(([arq, desc, tags]) => `
+  <div class="card">
+    <img src="${arq}.jpg" alt="${desc}" loading="lazy">
+    <div class="meta">
+      <p class="esperado">${desc}</p>
+      <div class="tags">${tags.map(t => `<span class="tag t-${t}">${t}</span>`).join('')}</div>
+      <a class="baixar" href="${arq}.jpg" download="${arq}.jpg">⬇ Baixar</a>
+    </div>
+  </div>
+`).join('');
+</script>
+</body>
+</html>
