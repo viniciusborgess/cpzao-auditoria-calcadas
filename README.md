@@ -177,33 +177,41 @@ Resultado: **~650 MB em vez de 8 GB**, e o dataset fica pronto em ~6 minutos.
 > no mesmo range, com folga, e são fatiados depois. Duas requisições por imagem fariam a
 > latência dominar o tempo total.
 
-### A restrição que amarra todo o projeto
+### Como o app descobre o tamanho de entrada do modelo
 
-O app tem o tamanho de entrada **fixo em código** (`app/src/inference.js`, linhas 3–4):
+O `yoloinferApp` original traz o tamanho de entrada **fixo em código** (`INPUT_W = INPUT_H = 192`).
+Isso cria a falha mais traiçoeira possível: um modelo exportado em outro tamanho **carrega sem
+erro nenhum** e desenha caixas em posições aleatórias. Nada lança exceção — o app simplesmente
+mente.
 
-```js
-const INPUT_W = 192;
-const INPUT_H = 192;
+Nesta versão o tamanho é **detectado por sondagem**. O `onnxruntime-web` 1.18 expõe só
+`inputNames`/`outputNames`, sem metadado de dimensões, então `detectInputSize()` tenta uma
+inferência dummy em cada candidato — 192, 256, 320, 416, 640 — e fica com o primeiro que o
+modelo aceitar. Um ONNX de shape estático rejeita qualquer outro tamanho:
+
+```
+sondando 192x192 ... ✅ ACEITO — saída [1,7,756]
+sondando 256x256 ... ❌ rejeitado (Got invalid dimensions for input: images)
+sondando 320x320 ... ❌ rejeitado
 ```
 
-Portanto o modelo **precisa** ser treinado e exportado com `imgsz=192`. Um modelo em 640
-carrega sem erro e desenha caixas em posições completamente erradas — é a falha mais
-traiçoeira do pipeline, porque não lança exceção. A célula 9 do notebook 02 verifica isso
-automaticamente, replicando em Python a função `detectOutputConventions()` do app.
+Com isso treino e app ficam **desacoplados**: dá para mudar o `imgsz` no notebook sem tocar
+em uma linha do app. A célula 9 do notebook 02 ainda confere a compatibilidade antes do
+deploy, replicando em Python a lógica de detecção do app.
 
 ### Contrato modelo ↔ app
 
 | item | valor | verificado em |
 |:--|:--|:--|
 | formato | ONNX, opset 12, shape estático | notebook 02, célula 9 |
-| entrada | `[1, 3, 192, 192]`, float32, RGB, `/255` | idem |
-| saída | `[1, 7, 756]` → `4 + 3 classes` × 756 âncoras | idem |
+| entrada | quadrada, float32, RGB, `/255` — tamanho **detectado** pelo app | idem |
+| saída | `[1, 7, N]` → `4 + 3 classes` × N âncoras | idem |
 | NMS | **não** embutido no grafo — o app faz em JS | idem |
-| coordenadas | pixel (0–192) → app usa preprocess *letterbox* | idem |
+| coordenadas | pixel → app usa preprocess *letterbox* | idem |
 | classes | 3, na mesma ordem do `data.yaml` | `app/src/main.js` |
 
-> **Por que 756 âncoras:** com entrada 192, o YOLOv8 gera grids em 3 escalas —
-> 24² + 12² + 6² = 576 + 144 + 36 = **756**.
+> **De onde vem o N:** o YOLOv8 gera grids em 3 escalas (/8, /16, /32). Com entrada 192 →
+> 24² + 12² + 6² = **756** âncoras; com 320 → 40² + 20² + 10² = **2100**.
 
 ---
 
@@ -348,7 +356,7 @@ Instalado, abre em tela cheia, sem barra de navegador, e funciona offline (servi
 | critério | pts | onde está |
 |:--|:--:|:--|
 | **Dataset & Rotulagem** — 60+ fotos, 3 classes, consistência, split correto | 4,0 | 600 imagens (10× o mínimo), balanceamento 0,96, 0 erros estruturais · [notebook 01](notebooks/01_dataset_prep.ipynb) célula 9 confere a rubrica automaticamente |
-| **Treinamento & Métricas** — pipeline funcional, análise, export correto | 6,0 | [notebook 02](notebooks/02_treino_export.ipynb) · matriz de confusão, PR, F1, curvas · export ONNX verificado contra o app |
+| **Treinamento & Métricas** — pipeline funcional, análise, export correto | 6,0 | [notebook 02](notebooks/02_treino_export.ipynb) · matriz de confusão, PR, curvas · diagnóstico das classes fracas e segunda iteração em 320 · export ONNX verificado contra o app |
 | **Deploy Mobile** — integração com o `yoloinferApp`, inferência fluida | 6,0 | [`app/`](app/) · câmera traseira em tempo real · PWA instalável |
 | **Organização & GitHub** — repositório e documentação | 4,0 | este README · notebooks documentados · módulo reutilizável em `scripts/` |
 

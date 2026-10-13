@@ -88,8 +88,9 @@ function toCanvasCoords(x, y) {
     srcX = (x - state.padX) / state.scale;
     srcY = (y - state.padY) / state.scale;
   } else {
-    srcX = state.sx + x * (state.sw / 192);
-    srcY = state.sy + y * (state.sh / 192);
+    const lado = inf.getInputSize();
+    srcX = state.sx + x * (state.sw / lado);
+    srcY = state.sy + y * (state.sh / lado);
   }
 
   return {
@@ -131,7 +132,7 @@ const CLASS_NAMES = ['degrau', 'escada', 'corrimao'];
 const CLASS_LABELS = { degrau: 'Degrau', escada: 'Escada', corrimao: 'Corrimão' };
 const POSE_NAMES  = ['person'];
 const COCO_NAMES  = ['person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','traffic light','fire hydrant','stop sign','parking meter','bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','umbrella','handbag','tie','suitcase','frisbee','skis','snowboard','sports ball','kite','baseball bat','baseball glove','skateboard','surfboard','tennis racket','bottle','wine glass','cup','fork','knife','spoon','bowl','banana','apple','sandwich','orange','broccoli','carrot','hot dog','pizza','donut','cake','chair','couch','potted plant','bed','dining table','toilet','tv','laptop','mouse','remote','keyboard','cell phone','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddy bear','hair drier','toothbrush'];
-const MODEL_CALCADAS = '/models/calcadas.onnx';   // modelo do projeto (exportado em 192)
+const MODEL_CALCADAS = '/models/calcadas.onnx';   // modelo do projeto (tamanho detectado ao carregar)
 const MODEL_FALLBACK = '/models/yolov8n.onnx';   // COCO, só para testar o app antes do treino
 const BUILTIN_MODELS = {
   detection: MODEL_CALCADAS,
@@ -139,7 +140,7 @@ const BUILTIN_MODELS = {
 const MODEL_LABELS = { detection: 'Detection', pose: 'Pose', segmentation: 'Segmentation' };
 
 let showBboxes = true;
-let normalizedDetCoords = true; // true = custom model (0-1 → ×192); false = standard YOLO (pixel)
+let normalizedDetCoords = true; // true = coords normalizadas (0-1); false = pixel (padrão Ultralytics)
 let detectionClassNames = CLASS_NAMES; // updated at load time based on detected numClasses
 
 function hexToRgb(hex) {
@@ -354,13 +355,16 @@ function drawMask(r, c) {
 
   // Draw full mask without bbox clip so sigmoid contours follow object shape
   const tl = toCanvasCoords(0, 0);
-  const br = toCanvasCoords(192, 192);
+  const br = toCanvasCoords(inf.getInputSize(), inf.getInputSize());
   ctx.drawImage(_maskCanvas, tl.x, tl.y, br.x - tl.x, br.y - tl.y);
 }
 
 // Run once after every model load to detect type, coordinate convention,
 // and preprocessing mode so the very first inference frame is correct.
 async function configureLoadedModel() {
+  // Primeiro descobre o tamanho de entrada: as convenções de saída são
+  // detectadas com uma inferência dummy, que precisa do shape correto.
+  await inf.detectInputSize();
   const conventions = await inf.detectOutputConventions();
   if (!conventions) return;
   const { type, normalizedCoords, numClasses } = conventions;
@@ -461,7 +465,7 @@ async function loadModelFromFile(file) {
     fpsBadge.hidden = true;
   } catch (e) {
     errorScreen.hidden = false;
-    errorMsg.textContent = 'Could not load model. Use a YOLOv8 ONNX model with input [1,3,192,192]. ' + e.message;
+    errorMsg.textContent = 'Não foi possível carregar o modelo. Use um ONNX YOLOv8 com entrada quadrada (192, 256, 320, 416 ou 640). ' + e.message;
     modelBadge.textContent = 'Error';
   }
   URL.revokeObjectURL(url);
@@ -579,7 +583,8 @@ async function doInference(source) {
   if (detectedType === 'pose') {
     return inf.postprocessPose(output, numBoxes, cTV, iTV);
   }
-  return inf.postprocessDetection(output, numBoxes, cTV, iTV, normalizedDetCoords ? 192 : 1);
+  return inf.postprocessDetection(output, numBoxes, cTV, iTV,
+                                  normalizedDetCoords ? inf.getInputSize() : 1);
 }
 
 // ── Init ──────────────────────────────────────────────────
@@ -611,9 +616,9 @@ async function init() {
     errorScreen.hidden = false;
     errorMsg.textContent =
       'Modelo não encontrado em ' + MODEL_CALCADAS + '. ' +
-      'Exporte o best.onnx com imgsz=192 (notebook 02) e copie para app/public/models/calcadas.onnx, ' +
+      'Exporte o best.onnx no notebook 02 e copie para app/public/models/calcadas.onnx, ' +
       'ou use o botão "Modelo" para carregar um .onnx manualmente. ' +
-      'Esperado: entrada [1,3,192,192], saída [1,7,756]. — ' +
+      'Esperado: entrada quadrada (192/256/320/416/640), saída [1,7,N]. — ' +
       e.message;
     fpsBadge.hidden = true;
     modelBadge.textContent = 'No Model';

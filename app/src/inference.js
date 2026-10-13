@@ -1,7 +1,13 @@
 import * as ort from 'onnxruntime-web';
 
-const INPUT_W = 192;
-const INPUT_H = 192;
+// Tamanho de entrada da rede. NÃO é fixo: `detectInputSize()` descobre o valor
+// real do modelo carregado e atualiza estas variáveis. O 192 é só o palpite
+// inicial, usado até a sondagem rodar.
+let INPUT_W = 192;
+let INPUT_H = 192;
+
+// Tamanhos sondados, em ordem. O primeiro que o modelo aceitar é o escolhido.
+const TAMANHOS_CANDIDATOS = [192, 256, 320, 416, 640];
 
 let session = null;
 let customPath = null;
@@ -11,9 +17,47 @@ let preprocessMode = 'crop'; // 'crop' (center-square) | 'letterbox' (scale+pad)
 export function setPreprocessMode(mode) { preprocessMode = mode; }
 export function getPreprocessMode()      { return preprocessMode; }
 
+export function getInputSize() { return INPUT_W; }
+
+/**
+ * Descobre o tamanho de entrada do modelo carregado.
+ *
+ * O onnxruntime-web 1.18 expõe só `inputNames`/`outputNames` — não há metadado
+ * com as dimensões. Então sondamos: um modelo exportado com shape estático
+ * rejeita qualquer tensor que não seja o tamanho dele, e o primeiro candidato
+ * que não lançar erro é o certo.
+ *
+ * Isso elimina a classe de bug mais traiçoeira do projeto: um modelo exportado
+ * num tamanho diferente do esperado carregava sem erro e desenhava caixas em
+ * posições aleatórias. Agora treino e app ficam desacoplados.
+ *
+ * Devolve o tamanho detectado, ou null se nenhum funcionar.
+ */
+export async function detectInputSize(candidatos = TAMANHOS_CANDIDATOS) {
+  if (!session) return null;
+  const nomeEntrada = session.inputNames[0];
+
+  for (const n of candidatos) {
+    try {
+      const t = new ort.Tensor('float32', new Float32Array(3 * n * n).fill(0.45), [1, 3, n, n]);
+      await session.run({ [nomeEntrada]: t });
+      INPUT_W = INPUT_H = n;
+      _canvas.width  = n;
+      _canvas.height = n;
+      console.log(`[calcadas] entrada do modelo detectada: ${n}x${n}`);
+      return n;
+    } catch {
+      // tamanho errado — o ORT rejeita o shape; segue para o próximo
+    }
+  }
+
+  console.warn('[calcadas] nenhum tamanho candidato aceito; mantendo', INPUT_W);
+  return null;
+}
+
 // Run a dummy inference immediately after loading to detect:
 //   - model type (detection / pose / segmentation)
-//   - coordinate convention (normalized 0-1 vs pixel 0-192)
+//   - coordinate convention (normalized 0-1 vs pixel)
 // Returns { type, normalizedCoords } or null if no session loaded.
 export async function detectOutputConventions() {
   if (!session) return null;
