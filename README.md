@@ -249,11 +249,20 @@ cpzao-auditoria-calcadas/
 
 ### Parte 1 — Dataset e Treino
 
-1. Abra **[`notebooks/01_dataset_prep.ipynb`](notebooks/01_dataset_prep.ipynb)** no Colab
-   (runtime **GPU**) e rode tudo. Em ~6 min você tem o dataset montado, validado e dividido.
+Abra os notebooks **direto do GitHub no Colab** — assim você sempre roda a versão atual:
+
+| notebook | abrir | o que faz |
+|:--|:--|:--|
+| **01 · Dataset** | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/viniciusborgess/cpzao-auditoria-calcadas/blob/main/notebooks/01_dataset_prep.ipynb) | monta, valida e divide o dataset (~6 min) |
+| **02 · Treino** | [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/viniciusborgess/cpzao-auditoria-calcadas/blob/main/notebooks/02_treino_export.ipynb) | treina, mede, exporta o ONNX (~20 min) |
+
+> ⚠️ **Não baixe o `.ipynb` para rodar.** Um arquivo baixado congela a versão daquele momento;
+> qualquer correção feita no repositório depois não chega até ele. Use os botões acima.
+
+1. Rode o **notebook 01** com runtime **GPU** (`Ambiente de execução → Alterar tipo → T4`).
    Nenhuma configuração é necessária.
-2. Abra **[`notebooks/02_treino_export.ipynb`](notebooks/02_treino_export.ipynb)** e rode tudo.
-   Treina, mostra as métricas e exporta o ONNX.
+2. Rode o **notebook 02**. Ele é autossuficiente: como no Colab cada notebook abre um runtime
+   separado, se o dataset não estiver presente ele o remonta sozinho.
    **Não prossiga se a célula 9 mostrar algum ❌** — o modelo não funcionaria no celular.
 3. Baixe os artefatos e distribua no repositório:
 
