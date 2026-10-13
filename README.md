@@ -20,9 +20,6 @@ câmera e aponte para uma escada. Não precisa instalar nada.
 > baixe uma e carregue no app pelo botão *📤 Imagem*. São fotos do conjunto de teste, que o
 > modelo nunca viu no treino.
 
-> 📖 **Vai apresentar?** O passo a passo está em **[`DEMO.md`](DEMO.md)** — instalação,
-> ajuste dos limiares, solução de problemas e os pontos para falar.
-
 ---
 
 ## 👥 Integrantes do Grupo
