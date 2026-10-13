@@ -15,6 +15,11 @@ processamento 100% local.
 Abra no celular (Chrome no Android ou Safari no iPhone), toque em **📷 Start**, permita a
 câmera e aponte para uma escada. Não precisa instalar nada.
 
+> 🖼️ **Sem uma escada por perto?** Use as
+> **[imagens de teste](https://viniciusborgess.github.io/cpzao-auditoria-calcadas/amostras/)** —
+> baixe uma e carregue no app pelo botão *📤 Imagem*. São fotos do conjunto de teste, que o
+> modelo nunca viu no treino.
+
 > 📖 **Vai apresentar?** O passo a passo está em **[`DEMO.md`](DEMO.md)** — instalação,
 > ajuste dos limiares, solução de problemas e os pontos para falar.
 

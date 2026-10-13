@@ -29,6 +29,22 @@ Se isso funcionou em casa, vai funcionar na aula.
 
 ---
 
+## 🖼️ Testar sem precisar achar uma escada
+
+Se quiser conferir que está tudo funcionando antes da aula, ou se não tiver uma escada por
+perto, use as imagens de teste:
+
+### 🔗 [viniciusborgess.github.io/cpzao-auditoria-calcadas/amostras/](https://viniciusborgess.github.io/cpzao-auditoria-calcadas/amostras/)
+
+1. Toque em **Baixar** numa das imagens
+2. Volte para o app e toque em **📤 Imagem**
+3. Escolha a foto salva
+
+São 10 fotos do conjunto de **teste** — o modelo nunca as viu durante o treino, então o
+resultado é honesto. As de **escada com corrimão** são as que funcionam melhor.
+
+---
+
 ## 📲 Instalar como aplicativo (opcional, mas fica melhor)
 
 Instalado, abre em tela cheia, sem a barra do navegador — parece um app de verdade.

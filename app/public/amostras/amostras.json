@@ -1,0 +1,42 @@
+[
+  {
+    "arquivo": "01-tres-classes-degrau-escada-corrimao.jpg",
+    "esperado": "3 degraus, 1 escada, 1 corrimão"
+  },
+  {
+    "arquivo": "02-tres-classes-degrau-escada-corrimao.jpg",
+    "esperado": "2 degraus, 1 escada, 1 corrimão"
+  },
+  {
+    "arquivo": "03-tres-classes-degrau-escada-corrimao.jpg",
+    "esperado": "1 degrau, 1 escada, 2 corrimãos"
+  },
+  {
+    "arquivo": "04-tres-classes-degrau-escada-corrimao.jpg",
+    "esperado": "1 degrau, 1 escada, 1 corrimão"
+  },
+  {
+    "arquivo": "05-escada-e-corrimao.jpg",
+    "esperado": "2 escadas, 3 corrimãos"
+  },
+  {
+    "arquivo": "06-escada-e-corrimao.jpg",
+    "esperado": "3 escadas, 4 corrimãos"
+  },
+  {
+    "arquivo": "07-escada-e-corrimao.jpg",
+    "esperado": "1 escada, 2 corrimãos"
+  },
+  {
+    "arquivo": "08-escada-e-corrimao.jpg",
+    "esperado": "1 escada, 1 corrimão"
+  },
+  {
+    "arquivo": "09-apenas-degraus.jpg",
+    "esperado": "3 degraus (guia de calçada)"
+  },
+  {
+    "arquivo": "10-apenas-degrau.jpg",
+    "esperado": "1 degrau"
+  }
+]
