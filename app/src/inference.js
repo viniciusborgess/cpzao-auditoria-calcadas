@@ -100,7 +100,7 @@ export async function loadModel(overridePath) {
   ort.env.wasm.numThreads = 1;
   ort.env.wasm.simd = true;
   customPath = overridePath || null;
-  const modelPath = overridePath || '/models/calcadas.onnx';
+  const modelPath = overridePath || (import.meta.env.BASE_URL + 'models/calcadas.onnx');
   
   const providers = ['wasm'];
   

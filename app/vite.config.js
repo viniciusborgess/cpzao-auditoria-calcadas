@@ -27,6 +27,9 @@ function ortWasmPlugin() {
 const isDev = process.env.NODE_ENV !== 'production';
 
 export default defineConfig({
+  // './' torna todos os caminhos relativos. Sem isso o app quebra ao ser
+  // servido numa subpasta, como no GitHub Pages (/cpzao-auditoria-calcadas/).
+  base: './',
   plugins: [ortWasmPlugin(), ...(isDev ? [basicSsl()] : [])],
   optimizeDeps: {
     exclude: ['onnxruntime-web'],

@@ -8,6 +8,16 @@ corrimãos — com **YOLOv8n**, exportado para **ONNX** e executado **diretament
 do celular** via ONNX Runtime Web (WebAssembly). Sem servidor, sem upload de imagem,
 processamento 100% local.
 
+## 📱 App no ar
+
+### 🔗 **[viniciusborgess.github.io/cpzao-auditoria-calcadas](https://viniciusborgess.github.io/cpzao-auditoria-calcadas/)**
+
+Abra no celular (Chrome no Android ou Safari no iPhone), toque em **📷 Start**, permita a
+câmera e aponte para uma escada. Não precisa instalar nada.
+
+> 📖 **Vai apresentar?** O passo a passo está em **[`DEMO.md`](DEMO.md)** — instalação,
+> ajuste dos limiares, solução de problemas e os pontos para falar.
+
 ---
 
 ## 👥 Integrantes do Grupo
@@ -385,16 +395,30 @@ O certificado é autoassinado, então o navegador alerta:
 > *secure context*. Em `http://` por IP o navegador **não** entrega a câmera. É por isso que
 > o projeto usa o plugin `basicSsl` no modo dev.
 
-#### Opção B — deploy público (recomendado para a apresentação)
+#### Opção B — a versão publicada (é o que usamos na apresentação)
 
-Uma URL HTTPS real torna o app instalável como PWA e elimina o aviso de certificado — bem
-mais confiável na frente da turma do que depender do Wi-Fi da sala.
+O app já está no ar em **https://viniciusborgess.github.io/cpzao-auditoria-calcadas/**,
+servido pelo GitHub Pages a partir da branch `gh-pages`.
+
+Uma URL HTTPS pública resolve três coisas de uma vez: funciona em qualquer celular sem
+depender da máquina de ninguém, elimina o aviso de certificado autoassinado, e torna o app
+instalável como PWA.
+
+Para republicar depois de mudar o modelo ou o código:
 
 ```bash
 cd app
 npm run build
-npx netlify-cli deploy --prod --dir=dist     # ou: npx vercel --prod
+cd dist && touch .nojekyll && rm -rf .git && git init -q && git checkout -q -b gh-pages
+git add -A && git commit -q -m "Deploy"
+git push --force https://github.com/viniciusborgess/cpzao-auditoria-calcadas.git gh-pages
 ```
+
+> O `vite.config.js` usa `base: './'` — todos os caminhos são relativos. Sem isso o app
+> quebraria ao ser servido numa subpasta, que é como o GitHub Pages funciona.
+
+> **Offline:** o service worker guarda o app e o modelo de 12 MB em cache na primeira visita.
+> Depois disso ele abre e infere sem rede — essencial numa sala com Wi-Fi ruim.
 
 #### Instalar como aplicativo
 
@@ -435,7 +459,7 @@ Instalado, abre em tela cheia, sem barra de navegador, e funciona offline (servi
 |:--|:--:|:--|
 | **Dataset & Rotulagem** — 60+ fotos, 3 classes, consistência, split correto | 4,0 | 600 imagens (10× o mínimo), balanceamento 0,96, 0 erros estruturais · [notebook 01](notebooks/01_dataset_prep.ipynb) célula 9 confere a rubrica automaticamente |
 | **Treinamento & Métricas** — pipeline funcional, análise, export correto | 6,0 | [notebook 02](notebooks/02_treino_export.ipynb) · matriz de confusão, PR, curvas · diagnóstico das classes fracas e segunda iteração em 320 · export ONNX verificado contra o app |
-| **Deploy Mobile** — integração com o `yoloinferApp`, inferência fluida | 6,0 | [`app/`](app/) · câmera traseira em tempo real · PWA instalável |
+| **Deploy Mobile** — integração com o `yoloinferApp`, inferência fluida | 6,0 | [app publicado](https://viniciusborgess.github.io/cpzao-auditoria-calcadas/) · câmera traseira em tempo real · PWA instalável · offline via service worker · ~10 ms por inferência |
 | **Organização & GitHub** — repositório e documentação | 4,0 | este README · notebooks documentados · módulo reutilizável em `scripts/` |
 
 ---
