@@ -109,39 +109,117 @@ rotulagem, em vez de critério improvisado.
 
 ## 🎯 Métricas Alcançadas
 
-> ⚠️ **PREENCHER** com a saída da célula 11 do notebook
-> [`02_treino_export.ipynb`](notebooks/02_treino_export.ipynb) — ela gera este bloco pronto.
-
-**Modelo:** YOLOv8n · `imgsz=192` · transfer learning dos pesos COCO
+**Modelo:** YOLOv8n · `imgsz=192` · 150 épocas · transfer learning dos pesos COCO
 
 ### Por classe (conjunto de **teste** — imagens nunca vistas pelo modelo)
 
 | classe | Precision | Recall | mAP@50 | mAP@50-95 |
 |:--|--:|--:|--:|--:|
-| `degrau` | — | — | — | — |
-| `escada` | — | — | — | — |
-| `corrimao` | — | — | — | — |
-| **geral** | — | — | — | — |
+| `degrau` | 0,449 | 0,100 | 0,088 | 0,030 |
+| `escada` | 0,671 | 0,488 | **0,524** | 0,286 |
+| `corrimao` | 0,529 | 0,108 | 0,119 | 0,039 |
+| **geral** | **0,550** | **0,232** | **0,244** | **0,118** |
 
 ### Validação × Teste
 
 | métrica | validação | teste |
 |:--|--:|--:|
-| mAP@50 | — | — |
-| mAP@50-95 | — | — |
-| Precision | — | — |
-| Recall | — | — |
+| mAP@50 | 0,328 | **0,244** |
+| mAP@50-95 | 0,169 | **0,118** |
+| Precision | 0,478 | **0,550** |
+| Recall | 0,339 | **0,232** |
 
 > As métricas de **teste** são as oficiais. O conjunto de validação guiou o *early stopping*,
 > então seus números são otimistas por construção; o teste nunca influenciou nenhuma decisão.
 
+### Modelo exportado
+
+| item | valor |
+|:--|:--|
+| formato | ONNX opset 12, shape estático |
+| entrada | `[1, 3, 192, 192]` |
+| saída | `[1, 7, 756]` = `4 + 3 classes` × 756 âncoras |
+| NMS | feito em JS pelo app (não embutido no grafo) |
+| tamanho | 12,62 MB |
+| latência (CPU) | **10,4 ms** (~96 FPS) |
+
+---
+
+## 📉 Análise Crítica dos Resultados
+
+O mAP@50 geral ficou em **0,244**. O diagnóstico de *por quê* é mais informativo que o número.
+
+### O desempenho não é uniforme — e o padrão revela a causa
+
+| classe | Recall | mAP@50 | formato típico do objeto |
+|:--|--:|--:|:--|
+| `escada` | **0,49** | **0,524** | blob compacto, proporção equilibrada |
+| `degrau` | 0,10 | 0,088 | faixa **longa e fina** (guia de calçada) |
+| `corrimao` | 0,11 | 0,119 | barra **fina e diagonal** |
+
+A única classe que funciona é a única com formato compacto. Isso aponta para uma causa
+**geométrica**, não de quantidade ou qualidade dos dados.
+
+### Três evidências que descartam as hipóteses óbvias
+
+**1. Não é falha de reconhecimento.** A matriz de confusão tem diagonal ≈ 0,47 nas **três**
+classes: quando o modelo detecta algo, classifica certo quase metade das vezes, de forma
+uniforme.
+
+**2. O modelo enxerga.** As predições no conjunto de teste estão visualmente corretas —
+`escada 0,78`, `escada 0,81`, `corrimao 0,74`, `degrau 0,64`, todas sobre os objetos certos.
+Ver [`docs/metricas/predicoes_teste.png`](docs/metricas/predicoes_teste.png).
+
+**3. Não é overfitting nem falta de treino.** As curvas mostram train e val loss caindo
+**juntas** até a época 150, com o mAP ainda subindo no fim. Ver
+[`docs/metricas/curvas_treino.png`](docs/metricas/curvas_treino.png).
+
+### A explicação: localização de objetos finos
+
+O mAP@50 exige IoU ≥ 0,5 com o gabarito, e o IoU de uma caixa longa e fina é brutalmente
+sensível ao erro na dimensão curta:
+
+> Uma guia de calçada que ocupa **3% da altura** da imagem vira **≈ 6 pixels** numa entrada de
+> 192. Um erro de 3 pixels na borda superior já corta o IoU pela metade — e a detecção,
+> visualmente correta, é contabilizada como falha.
+
+Para um blob como `escada`, o mesmo erro absoluto é irrelevante. Daí a diferença de ~5× no mAP
+entre classes do mesmo dataset, com exatamente o mesmo treino.
+
+### O que isso significa na prática
+
+| uso | o resultado serve? |
+|:--|:--|
+| **Auditoria em campo** (contar e medir barreiras) | ❌ 0,244 é insuficiente — precisaria da próxima iteração |
+| **Demonstração em tempo real** | ✅ o app precisa de *uma* caixa correta sobre o objeto apontado, não de recuperar todas as instâncias com IoU ≥ 0,5 |
+
+### Próxima iteração — em ordem de impacto esperado
+
+| mudança | de → para | porquê |
+|:--|:--|:--|
+| **`imgsz`** | 192 → **320** | ataca a causa raiz: o objeto fino ganha 1,7× mais pixels na dimensão crítica. Custo: 10 ms → ~29 ms (~34 FPS), ainda fluido |
+| `degrees` | 5.0 → **0.0** | guia de calçada é horizontal por definição; rotacionar descaracteriza o alvo |
+| `scale` | 0.5 → **0.3** | encolher a imagem faz o objeto fino desaparecer |
+| `mosaic` | 0.5 → **0.3** | o mosaico reduz cada imagem; pesado demais para alvos finos |
+| `epochs` | 150 → **250** | o mAP ainda subia, sem sinal de overfitting |
+
+Nada disso exige mexer no app: ele detecta o tamanho de entrada do modelo sozinho. Basta
+alterar `IMGSZ` na célula de configuração do notebook 02 e reexecutar.
+
+> Uma alternativa estrutural seria **fundir `degrau` e `escada`**. A matriz de confusão mostra
+> 0,28 + 0,19 de confusão cruzada entre as duas, o que faz sentido semântico — uma escada *é*
+> uma sequência de degraus, e a fronteira entre "um degrau" e "dois degraus" é genuinamente
+> ambígua. Mantivemos separadas porque a rubrica exige no mínimo 3 classes.
+
 | evidência | arquivo |
 |:--|:--|
-| matriz de confusão normalizada | `docs/metricas/confusion_matrix_normalized.png` |
-| curva Precision-Recall | `docs/metricas/PR_curve.png` |
-| curva F1 × confiança | `docs/metricas/F1_curve.png` |
-| perdas e métricas por época | `docs/metricas/curvas_treino.png` |
-| inferência no conjunto de teste | `docs/metricas/predicoes_teste.png` |
+| matriz de confusão normalizada | [`confusion_matrix_normalized.png`](docs/metricas/confusion_matrix_normalized.png) |
+| matriz de confusão (contagens) | [`confusion_matrix.png`](docs/metricas/confusion_matrix.png) |
+| perdas e métricas por época | [`curvas_treino.png`](docs/metricas/curvas_treino.png) |
+| métricas do Ultralytics por época | [`results.png`](docs/metricas/results.png) |
+| inferência no conjunto de teste | [`predicoes_teste.png`](docs/metricas/predicoes_teste.png) |
+| distribuição das labels | [`labels.jpg`](docs/metricas/labels.jpg) |
+| métricas em JSON | [`metricas.json`](docs/metricas/metricas.json) |
 
 ---
 
